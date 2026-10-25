@@ -44,7 +44,7 @@ void micReleased(void*, void* data, size_t count) {
   for (size_t n = 0; n < count; n += 8) {
     int32_t amplitude = block.samples[n];
     if (amplitude < 0) amplitude = -amplitude;
-    if (amplitude > peak) peak = static_cast<uint16_t>(min(amplitude, 32767L));
+    if (amplitude > peak) peak = static_cast<uint16_t>((amplitude > 32767 ? 32767 : amplitude));
   }
   latestPeak.store(peak, std::memory_order_relaxed);
   if (xQueueSend(audioQueue, &block, 0) != pdTRUE) captureError.store(true);
