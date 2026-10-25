@@ -1,0 +1,10 @@
+# Never commit credentials or raw voice recordings.
+firmware/include/secrets.h
+recordings/
+models/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pio/
+.DS_Store
+.venv/
