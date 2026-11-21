@@ -29,3 +29,15 @@ jobs:
         run: cp firmware/include/secrets.h.example firmware/include/secrets.h
       - name: Compile M5StickC Plus firmware
         run: pio run -d firmware
+
+  xiao:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PlatformIO
+        run: pip install platformio
+      - name: Compile XIAO ESP32S3 Sense standalone firmware
+        run: pio run -d xiao-voice-recorder
