@@ -1,3 +1,11 @@
+# Guided XIAO voice-recorder build (feature branch)
+
+**[Open the step-by-step website](https://coobytron.github.io/m5-stick---voice---Chat-GPT/)** · [Advanced wiring workshop](docs/workshop.html) · [Original 3D study](docs/assembly.html)
+
+The website now shows a focused nine-step build, one removable jumper at a time, with Next/Back controls and an always-visible pin list. The existing M5Stick firmware described below is unchanged and is a separate hardware project.
+
+---
+
 # XIAO ESP32-S3 — Interactive 3D Assembly (feature branch)
 
 **The interactive XIAO voice-recorder 3D viewer is located in [docs/index.html](docs/index.html).** GitHub's file preview does not run the scene; publish this branch's `/docs` directory with **Settings → Pages → Deploy from a branch** to view it in a browser.
