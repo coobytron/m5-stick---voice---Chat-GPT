@@ -1,3 +1,15 @@
+# XIAO ESP32-S3 — Interactive 3D Assembly (feature branch)
+
+**The interactive XIAO voice-recorder 3D viewer is located in [docs/index.html](docs/index.html).** GitHub's file preview does not run the scene; publish this branch's `/docs` directory with **Settings → Pages → Deploy from a branch** to view it in a browser.
+
+[3D viewer source](docs/index.html) · [Wiring and soldering guide](docs/README.md)
+
+After deploying from this branch's `/docs` directory, GitHub Pages should serve the viewer at **https://coobytron.github.io/m5-stick---voice---Chat-GPT/** (provided Pages completes successfully).
+
+> The M5Stick documentation below belongs to the older M5StickC Plus 1.1 firmware. This branch adds a **separate XIAO ESP32-S3 Sense + Feather Friend** concept and does not port that firmware.
+
+---
+
 # M5StickC Plus 1.1 — Pocket Voice Recorder
 
 An original **M5StickC Plus v1.1** captures microphone audio and streams it to a Mac over a **trusted 2.4 GHz Wi-Fi network**. The Mac saves WAV files and transcribes them locally with **whisper.cpp**. No cloud API or ChatGPT key required.
