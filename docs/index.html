@@ -224,7 +224,7 @@ $('prevStep').disabled=stageIndex===0;$('nextStep').textContent=stageIndex===8?'
 $('zoomFit').textContent='Fit';setZoom(zoom);
 if(window.innerWidth<850)window.scrollTo({top:0,behavior:'smooth'});
 }
-function setZoom(v){zoom=Math.max(.75,Math.min(2.2,v));$('diagram').style.width=(zoom*100)+'%';$('diagramWrap').style.width=(zoom*100)+'%';}
+function setZoom(v){zoom=Math.max(1,Math.min(2.2,v));$('diagram').style.width='100%';$('diagramWrap').style.width=(zoom*100)+'%';}
 $('prevStep').onclick=function(){go(stageIndex-1)};$('nextStep').onclick=function(){go(stageIndex===8?0:stageIndex+1)};
 $('zoomIn').onclick=function(){setZoom(zoom+.2)};$('zoomOut').onclick=function(){setZoom(zoom-.2)};$('zoomFit').onclick=function(){setZoom(1);$('diagramViewport').scrollTop=0;$('diagramViewport').scrollLeft=0};
 document.addEventListener('keydown',function(e){if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;if(e.key==='ArrowRight'){e.preventDefault();go(stageIndex+1)}if(e.key==='ArrowLeft'){e.preventDefault();go(stageIndex-1)}});
