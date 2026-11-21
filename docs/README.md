@@ -1,3 +1,17 @@
+# Updated interactive assembly workshop
+
+**[Open the interactive workshop](workshop.html)** — exploded-view slider, hole-by-hole breadboard map, clickable jumper wiring, circuit schematic, and soldering technique illustrations.
+
+**[Older rotatable 3D study](assembly.html)** — separate geometric 3D study. Its illustrative wire endpoints are **not** the authoritative way to connect the breadboard. Use the workshop's numbered pin-to-hole map for wiring.
+
+## Important physical correction
+
+Your small 30-column solderless breadboard is best used for the XIAO and the record button. Keep the larger Feather Friend beside it. Solder suitable male **headers** to both breakout boards if not already installed. Connect the Feather Friend's header pins with **female-to-male Dupont jumpers** (female to headers, male to breadboard). Your existing male-to-male jumpers are suitable for connections entirely within the breadboard, including rails and switch. **No jumper wires are soldered.** This is a proposed plan, not a tested final circuit.
+
+After prototyping, a separate solderable **perfboard** with female sockets and insulated soldered wiring provides a permanent alternative.
+
+---
+
 # XIAO ESP32-S3 Voice Recorder — Interactive 3D Assembly
 
 [Open the interactive 3D viewer](./index.html)
