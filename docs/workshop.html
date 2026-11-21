@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f6f2">
+<title>Voice Recorder / Assembly Lab — XIAO + Feather Friend</title>
+<style>
+:root{--bg:#f6f6f2;--surface:#fff;--ink:#152128;--muted:#66737b;--line:#dce1df;--orange:#f26a35;--dark:#213039;--shadow:0 8px 40px #101d2712}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}button,input{font:inherit}button{cursor:pointer}
+header{max-width:1560px;margin:auto;padding:30px 38px 28px;border-bottom:1px solid var(--line)}
+.kicker{color:#e1693d;letter-spacing:.14em;font-size:11px;font-weight:800;text-transform:uppercase}
+h1{font-weight:750;letter-spacing:-.054em;line-height:1;font-size:clamp(36px,5.1vw,70px);margin:15px 0 14px}
+header p{font-size:15px;color:var(--muted);line-height:1.6;max-width:800px;margin:0}
+.topmeta{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:20px}
+.pill{font-size:11px;letter-spacing:.02em;font-weight:700;background:#e7eee9;border:1px solid #d0ded3;padding:8px 12px;border-radius:99px}
+.pill.warn{background:#fff3e4;border-color:#f2d9ac}
+main{max-width:1560px;padding:24px 38px 56px;margin:auto}
+.tabbar{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 15px}
+.tab{padding:12px 17px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#53636b;font-size:13px;font-weight:700}
+.tab.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.panel{display:none}.panel.active{display:block}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:16px;align-items:start}
+.frame,.side,.below{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.framehead{padding:17px 20px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line);align-items:center}
+.framehead h2{margin:0;font-size:16px;letter-spacing:-.025em}
+.framehead small{color:var(--muted);font-size:12px}
+.viewport{overflow:auto;background:radial-gradient(circle at 45% 32%,#ffffff,#eef0ec)}
+.viewport svg{display:block;width:100%;height:auto;min-width:650px}
+.side{padding:23px}
+.side h3{font-size:12px;text-transform:uppercase;letter-spacing:.09em;margin:0 0 18px;color:#5a666c}
+.side h2{font-size:26px;letter-spacing:-.045em;line-height:1.11;margin:0 0 12px}
+.side p,.side li{font-size:13px;line-height:1.65;color:#5a686e}
+.side ul{padding-left:18px}
+.control{margin-top:18px;padding:17px;background:#f4f6f4;border-radius:9px}
+.control label{font-size:12px;font-weight:750;display:flex;justify-content:space-between;margin-bottom:11px}
+input[type=range]{width:100%;accent-color:#f26a35}
+.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.smallbtn{background:#fff;border:1px solid #cfd7d4;border-radius:7px;padding:9px 12px;font-size:12px;font-weight:700;color:#25343b;text-decoration:none;display:inline-block}
+.smallbtn:focus-visible,.tab:focus-visible,tr[tabindex]:focus-visible{outline:3px solid #f6ab79}
+.callout{border-left:3px solid var(--orange);padding:12px 16px;background:#fff5ee;margin-top:18px;color:#6f4a36;font-size:13px;line-height:1.58}
+.below{margin-top:16px;padding:25px}
+.below h3{margin:0 0 14px;font-size:16px}
+.below p,.below li{font-size:13px;line-height:1.6;color:#586770}
+table{width:100%;border-collapse:collapse;font-size:12px;text-align:left}
+td,th{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#66747a;font-weight:800}
+tr[data-net]{cursor:pointer}tr[data-net]:hover{background:#f2f4f1}tr[data-net].selected{background:#fff0e4}
+.swatch{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:7px;border:1px solid #0001}
+.sectionTitle{margin:0 0 18px;font-size:20px;letter-spacing:-.03em}
+.infoGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:17px}
+.infocard{border:1px solid var(--line);border-radius:9px;padding:17px;background:#fff}
+.infocard b{font-size:13px}.infocard p{font-size:12px;color:#66737b;line-height:1.6;margin-bottom:0}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.step{border:1px solid var(--line);padding:16px;background:#f9faf8;border-radius:9px}
+.step b{display:block;font-size:13px;margin-bottom:8px}.step span{font-size:12px;color:#66747a;line-height:1.6}
+.diagram-caption{padding:13px 19px;border-top:1px solid var(--line);font-size:12px;color:#68757b;line-height:1.5}
+.schem{background:#fdfdfc}
+.net-wire{fill:none;stroke-width:3.25;stroke-linecap:round;stroke-linejoin:round;opacity:.37;transition:opacity .2s,stroke-width .2s}
+.net-wire.focus{opacity:1;stroke-width:6}
+.hole{fill:#647172;stroke:#fff;stroke-width:1}
+.pin{stroke:#fff;stroke-width:1}
+.net-hover{cursor:pointer}
+.tabnotes{padding:14px 0 0;font-size:13px;color:#596a72;line-height:1.65}
+.footer{padding:25px 0 10px;color:#707b80;font-size:12px;line-height:1.7}
+.footer a{color:#425e6e}
+@media(max-width:1080px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:12px}.side .callout{grid-column:1/-1}.infoGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){header{padding:25px 17px}main{padding:18px 12px 40px}.tab{padding:10px 12px;font-size:12px}.side{display:block}.below{padding:18px}.steps,.infoGrid{grid-template-columns:1fr 1fr}.viewport svg{min-width:860px}h1{font-size:40px}}
+</style>
+</head>
+<body>
+<header><div class="kicker">VOICE RECORDER / HARDWARE WORKSHOP / REV 02</div>
+<h1>Understand every<br>connection.</h1>
+<p>A visual build guide for your <strong>Seeed XIAO ESP32-S3 Sense</strong>, <strong>Adafruit E-Ink Feather Friend #4446</strong>, four-color e-ink, and recording button. Explode the assembly, trace jumper wires to specific breadboard holes, and learn which parts actually require solder.</p>
+<div class="topmeta"><span class="pill">Solderless jumper-wire prototype</span><span class="pill">Feather Friend microSD storage</span><span class="pill warn">Proposed circuit · not bench-tested</span></div></header>
+<main>
+<nav class="tabbar" aria-label="Drawing mode">
+<button class="tab active" data-panel="explode">01 / Exploded assembly</button>
+<button class="tab" data-panel="bread">02 / Breadboard & jumpers</button>
+<button class="tab" data-panel="circuit">03 / Electrical schematic</button>
+<button class="tab" data-panel="solder">04 / Soldering workshop</button>
+<a class="smallbtn" href="assembly.html" style="margin-left:auto">Older rotatable 3D study ↗</a>
+</nav>
+<section class="panel active" id="explode">
+<div class="layout">
+<div class="frame"><div class="framehead"><h2>Layered exploded assembly</h2><small>Interactive assembly separation · diagrammatic, not dimension-accurate</small></div>
+<div class="viewport"><svg id="explodeSvg" viewBox="0 0 980 620" role="img" aria-label="Exploded arrangement of breadboard, header pins, XIAO Sense, Feather Friend, e-ink display, button and jumper wires">
+<defs><linearGradient id="bbGrad" x1="0" x2=".9" y1="0" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#e5e7e0"/></linearGradient><filter id="sh"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-opacity=".15"/></filter></defs>
+<text x="48" y="42" fill="#84918e" font-size="13" font-weight="750" letter-spacing="2">XIAO / LEFT</text>
+<text x="595" y="42" fill="#84918e" font-size="13" font-weight="750" letter-spacing="2">FEATHER FRIEND / RIGHT</text>
+<g id="exBread"><polygon points="55,427 452,427 536,473 140,473" fill="#fff" stroke="#c4cbc4"/><polygon points="140,473 536,473 536,506 140,506" fill="#dce2dc" stroke="#b4c0b8"/><polygon points="55,427 140,473 140,506 55,460" fill="#eaeee8" stroke="#b4c0b8"/>
+<path d="M87 437 L459 437 M97 445 L468 445 M113 460 L488 460" stroke="#a7b5b0" stroke-width="3" stroke-dasharray="4 10"/>
+<path d="M110 455 L468 455" stroke="#ee6658" stroke-width="2"/><path d="M120 465 L482 465" stroke="#5295ca" stroke-width="2"/>
+<text x="280" y="494" text-anchor="middle" fill="#778780" font-size="12">SOLDERLESS BREADBOARD · NO WIRE SOLDERING</text></g>
+<g id="exHeader"><path d="M155 389 L166 414 M175 389 L186 414 M195 389 L206 414 M215 389 L226 414 M235 389 L246 414 M255 389 L266 414 M275 389 L286 414 M226 405 L237 430 M246 405 L257 430 M266 405 L277 430 M286 405 L297 430 M306 405 L317 430 M326 405 L337 430 M346 405 L357 430" stroke="#c49856" stroke-width="5" stroke-linecap="round"/>
+<text x="320" y="383" fill="#a47137" font-size="12" font-weight="700">14 MALE PINS</text></g>
+<g id="exXiao" filter="url(#sh)"><polygon points="130,290 313,290 354,316 173,316" fill="#1b3033" stroke="#0c2028" stroke-width="3"/><polygon points="173,316 354,316 354,332 173,332" fill="#17232a"/>
+<rect x="121" y="298" width="22" height="13" rx="2" fill="#c1c9cc"/>
+<polygon points="174,297 237,297 261,310 198,310" fill="#40474b"/><circle cx="276" cy="305" r="13" fill="#2b3239" stroke="#768890" stroke-width="3"/><circle cx="276" cy="305" r="6" fill="#4b6875"/><text x="235" y="347" text-anchor="middle" fill="#243942" font-size="15" font-weight="800">XIAO ESP32-S3 SENSE</text></g>
+<g id="exButton"><rect x="456" y="384" width="56" height="31" rx="8" fill="#3b4344" stroke="#8c9899"/><circle cx="483" cy="400" r="11" fill="#b8c1bc"/><text x="482" y="436" text-anchor="middle" fill="#506367" font-size="12">BUTTON</text></g>
+<g id="exFeather" filter="url(#sh)"><polygon points="589,321 856,321 905,352 636,352" fill="#172528" stroke="#405258" stroke-width="3"/><polygon points="636,352 905,352 905,369 636,369" fill="#101d20"/><polygon points="638,331 737,331 753,345 654,345" fill="#b0b9ba" stroke="#eef0ed"/><rect x="758" y="328" width="61" height="13" fill="#374647"/><rect x="828" y="327" width="17" height="17" fill="#eef0ea"/><text x="742" y="392" text-anchor="middle" fill="#243942" font-size="15" font-weight="800">FEATHER FRIEND · MICROSD</text></g>
+<g id="exScreen" filter="url(#sh)"><polygon points="635,197 853,197 896,221 681,221" fill="#f8faf4" stroke="#b3bcb2" stroke-width="3"/><polygon points="651,202 841,202 867,216 680,216" fill="#dadcd3"/><polygon points="681,221 896,221 896,232 681,232" fill="#eef0e8"/><text x="755" y="190" text-anchor="middle" fill="#344d52" font-size="14" font-weight="700">2.13-IN · E-INK PANEL</text></g>
+<g id="exWires" fill="none" stroke-width="4" stroke-linecap="round"><path d="M343 302 C435 240 535 255 622 315" stroke="#e96849"/><path d="M350 306 C438 258 535 276 627 327" stroke="#348fc7"/><path d="M343 319 C451 291 522 296 625 333" stroke="#ddbb44"/><path d="M345 325 C455 309 536 318 632 338" stroke="#5bba9b"/><path d="M347 334 C462 327 542 339 643 346" stroke="#9a80d6"/></g>
+<g fill="#25353b" font-size="12" font-weight="700"><text x="58" y="548">Layers separate to show how parts fit.</text><text x="58" y="569" font-weight="400" fill="#6b7c7e">Only the board headers require soldering to make reliable breadboard connections.</text></g>
+</svg></div><div class="diagram-caption">Drag the separation slider to see the layer order. The Feather Friend sits beside the breadboard with female-to-male jumpers; the camera/microphone expansion stays attached to the XIAO.</div></div>
+<aside class="side"><div><h3>Stage 01 / Mechanical layout</h3><h2>See how it assembles.</h2><p>These are the actual functional pieces, separated into layers so you can see which part goes where. No jumper wire is ever soldered to the breadboard.</p>
+<div class="control"><label for="explodeRange">Exploded separation <span id="exPct">70%</span></label><input id="explodeRange" type="range" min="0" max="100" value="70"><div class="row" style="margin-top:12px"><button class="smallbtn" id="exAll">Explode</button><button class="smallbtn" id="exTogether">Assembled</button></div></div></div>
+<div class="callout"><b>One necessary purchase or substitute:</b> your photo shows mostly male-to-male jumpers. A Feather Friend with male headers sitting <em>off</em> the breadboard needs <b>female-to-male jumper cables</b>. Alternatively mount it on a second breadboard and use your existing male-to-male wires.</div></aside>
+</div>
+<div class="infoGrid"><div class="infocard"><b>XIAO headers</b><p>Two straight 1×7 male headers. Solder each row once. The metal pins then plug into spring sockets in the breadboard.</p></div><div class="infocard"><b>Feather Friend headers</b><p>Solder male headers to the Feather Friend's required 2.54 mm pads. Female Dupont ends slide onto those pins—no soldered signal wires.</p></div><div class="infocard"><b>Microphone + SD</b><p>The Sense expansion provides the microphone; the Feather Friend's microSD slot stores WAV files in the proposed design.</p></div></div>
+</section>
+<section class="panel" id="bread">
+<div class="layout">
+<div class="frame"><div class="framehead"><h2>Pin-to-hole breadboard map</h2><small>XIAO USB-C faces LEFT · board numbering 1–30 left-to-right in this diagram</small></div>
+<div class="viewport"><svg id="breadSvg" viewBox="0 0 1230 625" role="img" aria-label="Breadboard grid with numbered columns and color-coded jumper wires to an off-board Feather Friend"></svg></div>
+<div class="diagram-caption"><b>How to read:</b> e.g. <b>j8</b> is hole <b>j</b> in column <b>8</b>. A breadboard connects a–e in each column, and separately f–j in the same column. The gap isolates those halves. An arrow to a Feather label means a <b>female-to-male jumper</b>: male into the breadboard hole, female onto the soldered Feather header.</div>
+</div>
+<aside class="side"><div><h3>Stage 02 / Solderless wiring</h3><h2 id="netTitle">Select a wire.</h2><p id="netDetail">Tap a connection in the table or a colored jumper in the diagram to isolate it and see exactly which breadboard hole and Feather Friend signal to use.</p><div class="row"><button class="smallbtn" id="showAll">Show all wires</button><button class="smallbtn" id="showPower">Power only</button></div><div class="callout"><b>Important:</b> female-to-male Dupont cables connect the Feather Friend when it sits off your breadboard. Your existing male-to-male cables work for rail links and the button. A small breadboard won't comfortably hold both large boards together.</div></div></aside>
+</div>
+<div class="below"><h3>Exact breadboard jumper list (follow the hole names)</h3>
+<table id="wireTable"><thead><tr><th>Wire</th><th>From</th><th>To</th><th>Cable</th><th>Function</th></tr></thead><tbody></tbody></table>
+<p>Place the XIAO header pins into holes <b>e7–e13</b> and <b>f7–f13</b>, with its USB port facing the left edge of the drawing. Pins in e connect to holes a–d of their column; pins in f connect to g–j. The diagram shows the pin labels in that specific orientation. If your physical board is flipped, don't reuse these hole numbers without reorienting it.</p>
+</div>
+</section>
+<section class="panel" id="circuit">
+<div class="layout">
+<div class="frame"><div class="framehead"><h2>Electrical logic · schematic view</h2><small>Functional nets; independent of wire color or physical jumper route</small></div>
+<div class="viewport schem"><svg viewBox="0 0 1000 600" role="img" aria-label="Electrical block schematic of XIAO control signals and Feather Friend SPI display and microSD">
+<rect x="50" y="80" width="320" height="430" rx="12" fill="#e8eeeb" stroke="#6c817b" stroke-width="2"/><text x="210" y="112" text-anchor="middle" fill="#24373d" font-size="22" font-weight="800">XIAO ESP32-S3</text><text x="210" y="138" text-anchor="middle" fill="#60716e" font-size="14">Microphone on Sense expansion</text>
+<rect x="615" y="80" width="332" height="430" rx="12" fill="#eff1e9" stroke="#849382" stroke-width="2"/><text x="781" y="112" text-anchor="middle" fill="#24373d" font-size="21" font-weight="800">E-INK FEATHER FRIEND</text><text x="781" y="139" text-anchor="middle" fill="#60716e" font-size="13">Shared SPI + e-ink + microSD</text>
+<g font-family="monospace" font-size="14" font-weight="650">
+<text x="91" y="182" fill="#cd4943">3V3</text><text x="91" y="220" fill="#333">GND</text><text x="91" y="258" fill="#9c7a22">D8 / SCK</text><text x="91" y="296" fill="#208a5d">D9 / MISO</text><text x="91" y="334" fill="#357bbb">D10 / MOSI</text><text x="91" y="372" fill="#d66d2f">D0 / ECS</text><text x="91" y="410" fill="#8063aa">D1 / D-C</text><text x="91" y="448" fill="#bd628d">D3 / SDCS</text><text x="91" y="486" fill="#18929d">D4 / BUTTON</text>
+<text x="652" y="182" fill="#cd4943">3V + SRCS high</text><text x="652" y="220" fill="#333">GND</text><text x="652" y="258" fill="#9c7a22">SCK</text><text x="652" y="296" fill="#208a5d">MISO</text><text x="652" y="334" fill="#357bbb">MOSI</text><text x="652" y="372" fill="#d66d2f">ECS / E-INK CS</text><text x="652" y="410" fill="#8063aa">D/C</text><text x="652" y="448" fill="#bd628d">SDCS / SD CS</text></g>
+<g fill="none" stroke-width="3.5"><path d="M370 177 H615" stroke="#e65b50"/><path d="M370 215 H615" stroke="#30383d"/><path d="M370 253 H615" stroke="#ddbc4b"/><path d="M370 291 H615" stroke="#31a776"/><path d="M370 329 H615" stroke="#3a8dc8"/><path d="M370 367 H615" stroke="#ef8f46"/><path d="M370 405 H615" stroke="#8a71bc"/><path d="M370 443 H615" stroke="#d978a5"/></g>
+<rect x="415" y="471" width="142" height="55" rx="7" fill="#fcf2e8" stroke="#c47d40"/><text x="486" y="493" text-anchor="middle" font-size="14" font-weight="700" fill="#7d4e32">Record switch</text><text x="486" y="512" text-anchor="middle" font-size="12" fill="#7d4e32">D4 → GND</text><path d="M370 481 H415" stroke="#26adbb" stroke-width="3" fill="none"/><path d="M556 496 H590 V215 H615" stroke="#333" stroke-width="2.5" fill="none"/>
+<g fill="#59706b" font-size="12"><text x="50" y="544">USB-C powers the prototype. Battery and PowerBoost disconnected.</text><text x="615" y="475">RST: auto reset</text><text x="615" y="493">BUSY: optional pad</text></g>
+</svg></div><div class="diagram-caption">ECS selects e-ink; SDCS selects the Feather Friend microSD. SRCS is held high to keep the unused SRAM inactive. SCK/MOSI/MISO are shared SPI bus signals. Ground must be common.</div></div>
+<aside class="side"><div><h3>Stage 03 / Circuit rules</h3><h2>Why these wires exist.</h2><p>SPI allows several peripherals to share clock and data, with a separate chip-select per peripheral. This project proposes using the Feather Friend microSD for audio storage and the same Friend for screen updates.</p><ul><li><b>Never wire the Feather Friend to 5V</b> in this plan; use XIAO's regulated 3.3V.</li><li><b>MISO is needed</b> for the microSD even though e-ink itself is generally write-only.</li><li><b>RST/BUSY:</b> Feather Friend supplies display auto-reset; BUSY is optional for a delayed-refresh implementation.</li><li><b>Library support:</b> your quad-color panel is JD79661; confirm the specific display driver and chip-select configuration in firmware.</li></ul></div>
+<div class="callout">The Sense expansion may also expose an SD interface that shares SPI lines. Configure or leave its SD chip select inactive so that only the intended Feather Friend microSD is selected. Confirm the expansion revision before flashing firmware.</div></aside>
+</div>
+</section>
+<section class="panel" id="solder">
+<div class="layout">
+<div class="frame"><div class="framehead"><h2>Header soldering: where the iron actually goes</h2><small>Solder header-to-board plated pads only. Never solder jumper cables into the breadboard.</small></div>
+<div class="viewport"><svg viewBox="0 0 1000 550" role="img" aria-label="Step by step illustration of header pins and solder joints">
+<rect x="44" y="70" width="910" height="430" rx="18" fill="#f4f6f2" stroke="#dde3dd"/>
+<g font-size="16" font-weight="800" fill="#253840"><text x="95" y="117">1 / HEADER HELD STRAIGHT</text><text x="537" y="117">2 / HEAT PAD + PIN TOGETHER</text></g>
+<rect x="88" y="243" width="350" height="44" rx="8" fill="#fdfdf7" stroke="#d6d7c9"/>
+<g fill="#777e78"><circle cx="152" cy="255" r="6"/><circle cx="206" cy="255" r="6"/><circle cx="260" cy="255" r="6"/><circle cx="314" cy="255" r="6"/><circle cx="368" cy="255" r="6"/></g>
+<rect x="134" y="203" width="253" height="21" rx="2" fill="#192c2f"/>
+<g stroke="#cb9b55" stroke-width="9" stroke-linecap="round"><path d="M152 170 V249"/><path d="M206 170 V249"/><path d="M260 170 V249"/><path d="M314 170 V249"/><path d="M368 170 V249"/></g>
+<path d="M95 299 H418" stroke="#b3c0b9" stroke-dasharray="6 7"/>
+<text x="265" y="335" text-anchor="middle" font-size="13" fill="#6a7a76">Breadboard holds pin alignment</text>
+<rect x="554" y="230" width="316" height="34" rx="3" fill="#192c2f"/><rect x="554" y="229" width="316" height="5" fill="#be9454"/>
+<path d="M713 146 V297" stroke="#d4a05a" stroke-width="16" stroke-linecap="round"/>
+<path d="M693 226 Q713 244 731 226" fill="none" stroke="#b2bbc2" stroke-width="8"/><path d="M610 134 L681 203" stroke="#4c5a5c" stroke-width="19" stroke-linecap="round"/><path d="M683 203 L697 218" stroke="#a7b1b2" stroke-width="11" stroke-linecap="round"/>
+<path d="M790 155 L733 217" stroke="#d69d4b" stroke-width="5" stroke-linecap="round"/>
+<text x="713" y="322" text-anchor="middle" font-size="13" fill="#6a7a76">Solder fillet connects the plated pad to the pin</text>
+<g fill="#253840" font-size="16" font-weight="800"><text x="95" y="411">3 / TEST JOINTS</text><text x="537" y="411">4 / MOVE TO FINAL PERFBOARD</text></g>
+<g fill="#677a76" font-size="13"><text x="95" y="436">Smooth, small fillet · no bridges · no movement</text><text x="95" y="456">Continuity test before USB power</text><text x="537" y="436">Headers can remain on the XIAO permanently</text><text x="537" y="456">Female sockets allow later removal or repair</text></g>
+</svg></div><div class="diagram-caption">The solder goes onto each board's metal pad where a header pin passes through—not the ESP32 chip, camera, e-ink ribbon, or removable jumper wires.</div></div>
+<aside class="side"><div><h3>Stage 04 / Tools & technique</h3><h2>Minimal soldering, reliable connections.</h2><ul><li>Start with a fine chisel tip, flux and electronics solder. Use a temperature-controlled iron.</li><li>As a starting point, use around <b>320–350°C</b> for leaded solder, or <b>350–380°C</b> for many lead-free alloys; follow your solder's recommendations.</li><li>Place both header strips in the breadboard first. Set the XIAO on top, tack <b>one pad at each end</b>, verify alignment, then solder remaining pads.</li><li>Touch <b>both the plated pad and header pin</b> with the tip, feed a small amount of solder to the joint, then remove iron and hold still.</li><li>A good joint is smooth and joins pad to pin. Reflow dull, cracked or unsupported joints with flux. Remove bridges with solder wick.</li><li>Keep the LiPo battery, ribbon cable and microphone/camera assembly away from the hot iron.</li></ul></div><div class="callout"><b>Do not solder directly to the ESP32 package or other surface-mounted chips.</b> You are attaching connectors to prepared through-hole/castellated pads only. If headers are already solidly soldered, skip the soldering step entirely.</div></aside>
+</div>
+<div class="below"><h3>Bench checklist</h3><div class="steps"><div class="step"><b>01 · Unplug power</b><span>USB removed, battery disconnected before soldering or continuity tests.</span></div><div class="step"><b>02 · Solder headers only</b><span>Two seven-pin rows on XIAO, and the relevant Feather Friend header positions.</span></div><div class="step"><b>03 · Plug temporary cables</b><span>Use the breadboard's spring contacts, male-to-male for rails and button, female-to-male to the off-board Feather Friend.</span></div><div class="step"><b>04 · Test by subsystem</b><span>USB boot → mic → Feather microSD write → e-ink display → record button → battery later.</span></div></div></div>
+</section>
+<div class="below" style="margin-top:18px"><h3>Materials for the recommended no-solder-wires test setup</h3>
+<div class="infoGrid"><div class="infocard"><b>Already in your photos</b><p>XIAO ESP32-S3 Sense, Feather Friend with 24-pin e-ink ribbon, mini breadboard, male-to-male Dupont wires, LiPo and PowerBoost (not used yet).</p></div><div class="infocard"><b>Check what you have</b><p>Two soldered 1×7 male header rows on the XIAO; suitable soldered headers on the Feather Friend; one small normally-open tactile button; microSD card.</p></div><div class="infocard"><b>Likely extra purchase</b><p>A small pack of <b>female-to-male Dupont jumper wires</b>, to connect your Feather Friend off the crowded breadboard. A second breadboard is another option.</p></div></div></div>
+<div class="footer">Sources: <a target="_blank" rel="noopener" href="https://wiki.seeedstudio.com/xiao_esp32s3_pin_multiplexing/">Seeed XIAO ESP32-S3 pin map</a> · <a target="_blank" rel="noopener" href="https://learn.adafruit.com/adafruit-2-13-eink-display-breakouts-and-featherwings/pinouts">Adafruit Feather Friend SPI / chip selects</a> · <a target="_blank" rel="noopener" href="https://www.adafruit.com/product/6373">Adafruit 2.13-inch quad-color JD79661 panel</a> · <a target="_blank" rel="noopener" href="https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/">Seeed soldered headers guide</a>. This is an engineering illustration; confirm board silkscreen and continuity with a multimeter. No firmware or electrical behavior has been verified on your physical assembly.</div>
+</main>
+<script>
+(function(){
+var tabs=document.querySelectorAll(".tab[data-panel]");
+tabs.forEach(function(t){t.addEventListener("click",function(){tabs.forEach(function(x){x.classList.toggle("active",x===t)});document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("active",p.id===t.dataset.panel)})})});
+var exp=document.getElementById("explodeRange");
+function explode(v){var n=Number(v)/100;document.getElementById("exPct").textContent=v+"%";var levels={"exBread":0,"exHeader":-20,"exXiao":-105,"exButton":-45,"exFeather":-60,"exScreen":-125,"exWires":-20};Object.keys(levels).forEach(function(k){document.getElementById(k).setAttribute("transform","translate(0,"+(levels[k]*n)+")")});}
+exp.oninput=function(){explode(exp.value)};document.getElementById("exAll").onclick=function(){exp.value=100;explode(100)};document.getElementById("exTogether").onclick=function(){exp.value=0;explode(0)};explode(exp.value);
+
+var nets=[
+{id:"power",color:"#e75e55",from:"j11",to:"top + rail",type:"M–M",desc:"XIAO 3V3 powers the red (+) breadboard rail."},
+{id:"ground",color:"#383e42",from:"j12",to:"top − rail",type:"M–M",desc:"XIAO GND provides a common blue (−) rail."},
+{id:"vcc",color:"#d84e47",from:"top + rail",to:"Feather 3V",type:"F–M",desc:"Female end on Feather 3V male header; male end on breadboard power rail."},
+{id:"gnd2",color:"#6b737b",from:"top − rail",to:"Feather GND",type:"F–M",desc:"Female end on Feather GND pin, male end on blue ground rail."},
+{id:"sck",color:"#d4ac35",from:"j8",to:"Feather SCK",type:"F–M",desc:"SPI clock: XIAO D8 (GPIO7) to Feather SCK."},
+{id:"miso",color:"#34a678",from:"j9",to:"Feather MISO",type:"F–M",desc:"SPI input: XIAO D9 (GPIO8) reads data from microSD."},
+{id:"mosi",color:"#3b8fc6",from:"j10",to:"Feather MOSI",type:"F–M",desc:"SPI output: XIAO D10 (GPIO9) sends data to display and SD."},
+{id:"ecs",color:"#ed8846",from:"a13",to:"Feather ECS",type:"F–M",desc:"XIAO D0 (GPIO1) selects the e-ink controller."},
+{id:"dc",color:"#9972c8",from:"a12",to:"Feather D/C",type:"F–M",desc:"XIAO D1 (GPIO2) chooses data or command for e-ink."},
+{id:"sdcs",color:"#d77ca4",from:"a10",to:"Feather SDCS",type:"F–M",desc:"XIAO D3 (GPIO4) selects Feather's microSD card."},
+{id:"srcs",color:"#969da3",from:"top + rail",to:"Feather SRCS",type:"F–M",desc:"Hold unused SRAM chip-select high (3.3 V), keeping it inactive."},
+{id:"button",color:"#1dabb5",from:"a9",to:"switch pin at a19",type:"M–M",desc:"XIAO D4 (GPIO5) connects to one side of a normally-open button; use INPUT_PULLUP."},
+{id:"button_gnd",color:"#575d62",from:"switch opposite pin at j19",to:"top − rail",type:"M–M",desc:"Opposite switch contact goes to ground; press causes GPIO5 to read LOW."}
+];
+var svg=document.getElementById("breadSvg");
+var ns="http://www.w3.org/2000/svg";function el(tag,atts,parent,txt){var x=document.createElementNS(ns,tag);Object.keys(atts||{}).forEach(function(k){x.setAttribute(k,atts[k])});if(txt!==undefined)x.textContent=txt;(parent||svg).appendChild(x);return x}
+var xC=function(c){return 85+(c-1)*18.2};
+var yy={a:209,b:233,c:257,d:281,e:305,f:386,g:410,h:434,i:458,j:482};
+function point(place){if(place.indexOf("rail")>-1){return place.indexOf("+")>-1?[xC(15),115]:[xC(15),143]}
+if(place.indexOf("switch")===0){return place.indexOf("a19")>-1?[xC(19),yy.a]:[xC(19),yy.j]}
+var m=place.match(/^([a-j])(\d+)$/);return m?[xC(+m[2]),yy[m[1]]]:null}
+el("rect",{x:44,y:65,width:615,height:520,rx:13,fill:"#f8f8f2",stroke:"#cdd4cc","stroke-width":2});
+el("line",{x1:60,y1:115,x2:646,y2:115,stroke:"#e66b63","stroke-width":2});
+el("line",{x1:60,y1:143,x2:646,y2:143,stroke:"#4995c8","stroke-width":2});
+el("line",{x1:60,y1:542,x2:646,y2:542,stroke:"#e66b63","stroke-width":2});
+el("line",{x1:60,y1:568,x2:646,y2:568,stroke:"#4995c8","stroke-width":2});
+el("rect",{x:61,y:319,width:584,height:54,fill:"#e6e9e3"});
+el("text",{x:348,y:348,"text-anchor":"middle","font-size":12,fill:"#73817b","font-weight":700},"CENTER GAP / NOT CONNECTED");
+["a","b","c","d","e","f","g","h","i","j"].forEach(function(r){el("text",{x:56,y:yy[r]+4,"text-anchor":"middle","font-size":12,fill:"#61726d","font-weight":700},null,r)});
+for(var c=1;c<=30;c++){
+ el("text",{x:xC(c),y:191,"text-anchor":"middle","font-size":10,fill:"#81908b"},null,String(c));
+ el("text",{x:xC(c),y:524,"text-anchor":"middle","font-size":10,fill:"#81908b"},null,String(c));
+ Object.keys(yy).forEach(function(r){el("circle",{cx:xC(c),cy:yy[r],r:3.4,class:"hole"})});
+ [115,143,542,568].forEach(function(y){el("circle",{cx:xC(c),cy:y,r:3.25,class:"hole"})});
+}
+el("text",{x:52,y:108,fill:"#d34b42","font-size":18,"font-weight":800},null,"+");
+el("text",{x:52,y:149,fill:"#4277a9","font-size":18,"font-weight":800},null,"−");
+el("text",{x:52,y:548,fill:"#d34b42","font-size":18,"font-weight":800},null,"+");
+el("text",{x:52,y:574,fill:"#4277a9","font-size":18,"font-weight":800},null,"−");
+el("text",{x:68,y:44,fill:"#576c6b","font-size":14,"font-weight":750},null,"SOLDERLESS BREADBOARD · 30 COLUMNS");
+el("rect",{x:730,y:112,width:445,height:440,rx:15,fill:"#e6eeec",stroke:"#b2c5bd","stroke-width":2});
+el("rect",{x:770,y:140,width:370,height:380,rx:9,fill:"#1b2b31",stroke:"#536a66","stroke-width":3});
+el("text",{x:960,y:180,"text-anchor":"middle",fill:"#fff","font-size":18,"font-weight":800},null,"E-INK FEATHER FRIEND");
+el("text",{x:960,y:202,"text-anchor":"middle",fill:"#a5bfbd","font-size":12},null,"Sits OFF this small breadboard");
+el("rect",{x:900,y:226,width:115,height:45,rx:5,fill:"#abbabb"});
+el("text",{x:958,y:254,"text-anchor":"middle",fill:"#233038","font-size":14,"font-weight":700},null,"microSD");
+el("rect",{x:1033,y:232,width:81,height:38,rx:3,fill:"#e0e9d9"});
+el("text",{x:1073,y:256,"text-anchor":"middle",fill:"#435249","font-size":12},null,"FPC");
+var featherNames=["3V","GND","SCK","MISO","MOSI","ECS","D/C","SDCS","SRCS"];
+var fx=824,fy=304,dy=24;
+var fPts={};featherNames.forEach(function(n,i){fPts["Feather "+n]=[fx,fy+i*dy];el("circle",{cx:fx,cy:fy+i*dy,r:7,fill:"#d4a55b",stroke:"#121b20","stroke-width":2});el("text",{x:845,y:fy+i*dy+5,fill:"#ecf1f0","font-size":13,"font-weight":700},null,n);});
+el("text",{x:910,y:575,"text-anchor":"middle",fill:"#556c69","font-size":12,"font-weight":700},null,"FEMALE ENDS ATTACH HERE → MALE HEADER");
+el("rect",{x:205,y:277,width:140,height:130,rx:13,fill:"#182a30",stroke:"#344a50","stroke-width":3});
+el("rect",{x:186,y:326,width:24,height:36,rx:6,fill:"#c0cbcb",stroke:"#61787e","stroke-width":2});
+el("text",{x:270,y:336,"text-anchor":"middle",fill:"#fff","font-size":14,"font-weight":800},null,"XIAO S3");
+el("text",{x:270,y:353,"text-anchor":"middle",fill:"#e4d8ab","font-size":10},null,"SENSE");
+el("text",{x:270,y:369,"text-anchor":"middle",fill:"#c9d6d4","font-size":11},null,"USB-C ←");
+el("rect",{x:xC(19)-17,y:314,width:34,height:57,rx:7,fill:"#383f40"});
+el("circle",{cx:xC(19),cy:344,r:12,fill:"#afb9b7",stroke:"#e1e5e0","stroke-width":2});
+el("text",{x:xC(19),y:302,"text-anchor":"middle",fill:"#5b6e6e","font-size":10,"font-weight":750},null,"BUTTON");
+var topPin=["D6","D5","D4","D3","D2","D1","D0"], bottomPin=["D7","D8","D9","D10","3V3","GND","5V"];
+for(var k=0;k<7;k++){var cx=xC(7+k);el("circle",{cx:cx,cy:yy.e,r:6,fill:"#d9ae60",stroke:"#17252b","stroke-width":1.4});el("circle",{cx:cx,cy:yy.f,r:6,fill:"#d9ae60",stroke:"#17252b","stroke-width":1.4});
+el("text",{x:cx,y:yy.e-9,"text-anchor":"middle",fill:"#fff","font-size":9,"font-weight":700},null,topPin[k]);
+el("text",{x:cx,y:yy.f+18,"text-anchor":"middle",fill:"#fff","font-size":9,"font-weight":700},null,bottomPin[k]);}
+var wireLayer=el("g",{id:"netLayer"});
+var fcount=0;var pathById={};
+nets.forEach(function(n){
+ var start=point(n.from),end=point(n.to);
+ if(!start&&fPts[n.from])start=fPts[n.from];
+ if(!end&&fPts[n.to])end=fPts[n.to];
+ if(!start||!end)return;
+ var eIsFeather=!!fPts[n.to];
+ var bendY= eIsFeather ? 66+fcount++*15: (n.id==="power"? 136 : n.id==="ground"?154:n.id==="button"?232:566);
+ var d;
+ if(eIsFeather){d="M"+start[0]+","+start[1]+" C"+(start[0]+90)+","+bendY+" "+(end[0]-135)+","+bendY+" "+end[0]+","+end[1];}
+ else{d="M"+start[0]+","+start[1]+" C"+(start[0]+65)+","+bendY+" "+(end[0]-60)+","+bendY+" "+end[0]+","+end[1];}
+ var path=el("path",{d:d,stroke:n.color,class:"net-wire net-hover",id:"w-"+n.id,"data-net":n.id},wireLayer);
+ path.addEventListener("click",function(){selectNet(n.id)});
+ pathById[n.id]=path;
+ });
+var tbody=document.querySelector("#wireTable tbody");
+nets.forEach(function(n){var tr=document.createElement("tr");tr.tabIndex=0;tr.dataset.net=n.id;
+var cells=['<span class="swatch" style="background:'+n.color+'"></span>'+n.id.toUpperCase(),n.from,n.to,n.type,n.desc];
+tr.innerHTML=cells.map(function(t){return "<td>"+t+"</td>"}).join("");
+tr.addEventListener("click",function(){selectNet(n.id)});tr.addEventListener("keydown",function(ev){if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();selectNet(n.id)}});
+tbody.appendChild(tr)});
+function selectNet(id){
+ document.querySelectorAll(".net-wire").forEach(function(p){p.classList.toggle("focus",p.dataset.net===id);p.style.opacity=(id===null?".65":p.dataset.net===id?"1":".08");});
+ document.querySelectorAll("tr[data-net]").forEach(function(r){r.classList.toggle("selected",r.dataset.net===id)});
+ var obj=nets.find(function(n){return n.id===id});
+ document.getElementById("netTitle").textContent=obj?obj.from+" → "+obj.to:"Select a wire.";
+ document.getElementById("netDetail").textContent=obj?obj.desc+" Cable type: "+obj.type+" (F–M = female-to-male, M–M = male-to-male).":"Tap a connection in the table or a colored jumper in the diagram to isolate it and see its purpose.";
+}
+document.getElementById("showAll").onclick=function(){selectNet(null)};
+document.getElementById("showPower").onclick=function(){selectNet("power")};
+selectNet(null);
+})();
+</script></body></html>
