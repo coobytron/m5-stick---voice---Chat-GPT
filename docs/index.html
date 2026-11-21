@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f5f2">
+<title>XIAO Voice Recorder — Interactive 3D Assembly</title>
+<style>
+:root{--bg:#f4f4f0;--ink:#161f24;--muted:#677179;--stroke:#daddd8;--accent:#eb612f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}button{font:inherit;cursor:pointer}a{color:inherit}
+header{padding:32px clamp(20px,4.5vw,70px) 24px;border-bottom:1px solid var(--stroke);display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.eyebrow{font-size:11px;letter-spacing:.12em;font-weight:750;color:var(--muted);margin-bottom:14px}
+h1{font-size:clamp(32px,4vw,58px);line-height:1.01;letter-spacing:-.055em;font-weight:710;margin:0;max-width:820px}
+.lede{margin:14px 0 0;color:var(--muted);max-width:650px;line-height:1.5;font-size:14px}
+.headlink{white-space:nowrap;border:1px solid var(--stroke);border-radius:8px;padding:10px 14px;text-decoration:none;font-size:12px}
+.layout{padding:20px clamp(20px,4.5vw,70px) 45px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px}
+.viewer{background:#e8e9e5;border:1px solid var(--stroke);border-radius:13px;overflow:hidden;position:relative;min-height:620px;display:flex;flex-direction:column}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;padding:16px;position:relative;z-index:2}
+.tab{color:#354048;border:1px solid #d4d8d3;background:#fafbf8;padding:11px 14px;border-radius:8px;font-size:12px;font-weight:650}
+.tab.active{background:#18242a;color:white;border-color:#18242a}
+#scene{position:absolute;inset:0;touch-action:none;cursor:grab}#scene:active{cursor:grabbing}
+.viewportfooter{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:#5d686f;background:linear-gradient(transparent,#f0f0eddd)}
+.toolbtn{border-radius:7px;border:1px solid #b7c2bf;background:#fff;padding:9px 11px;color:#26363d;font-size:12px}
+aside{background:white;border:1px solid var(--stroke);border-radius:13px;align-self:start;overflow:hidden}
+.info{padding:24px}.stepnum{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.1em}
+h2{font-size:25px;letter-spacing:-.04em;line-height:1.1;margin:10px 0 12px}#stageCopy{font-size:13px;line-height:1.6;color:#4d575e;min-height:75px}
+.meta{padding:20px 24px;border-top:1px solid var(--stroke)}
+h3{margin:0 0 11px;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.rows{display:grid;gap:8px}.wire{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:12px}.dot{height:9px;width:9px;border-radius:100%}.dest{font-weight:650}
+.note{padding:14px;background:#f5f5f1;border-radius:8px;font-size:12px;line-height:1.5;color:#556068}
+.buttons{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0 0}
+footer{padding:0 clamp(20px,4.5vw,70px) 42px;color:#6b7478;font-size:12px;line-height:1.6}
+@media(max-width:970px){.layout{grid-template-columns:1fr}.viewer{min-height:520px}header{flex-direction:column}.headlink{align-self:flex-start}}@media(max-width:540px){.viewer{min-height:470px}.tabs{padding:10px;gap:5px}.tab{padding:10px;font-size:10px}.viewportfooter{flex-wrap:wrap}.info{padding:18px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}</script>
+</head>
+<body>
+<header><div><div class="eyebrow">HARDWARE STUDY / 01 / VOICE RECORDER</div><h1>From breadboard to<br>soldered recorder.</h1><p class="lede">Interactive 3D assembly study for XIAO ESP32-S3 Sense, Adafruit E-Ink Feather Friend, 2.13&quot; e-ink, onboard microSD storage, and one record button. Rotate, zoom, compare, and export the model.</p></div><a class="headlink" href="../README.md">Source repository</a></header>
+<div class="layout">
+<section class="viewer" aria-label="Rotatable 3D hardware assembly viewer">
+<div class="tabs"><button class="tab active" data-stage="headers">01 / Solder headers</button><button class="tab" data-stage="prototype">02 / Breadboard</button><button class="tab" data-stage="final">03 / Perfboard</button></div>
+<div id="scene"></div>
+<div class="viewportfooter"><span>DRAG TO ROTATE · SCROLL OR PINCH TO ZOOM · RIGHT-DRAG TO PAN</span><div class="buttons"><button class="toolbtn" id="toggleWires">Hide wires</button><button class="toolbtn" id="resetCam">Reset view</button><button class="toolbtn" id="exportGlb">Export 3D (.glb)</button></div></div>
+</section>
+<aside>
+<section class="info"><div class="stepnum" id="stepNum">STEP 01 / 03</div><h2 id="stageTitle">Solder the headers.</h2><div id="stageCopy">Two 7-pin male headers are held square by the breadboard. Solder each XIAO pad to its header pin with USB and battery disconnected. The breadboard itself is never soldered.</div></section>
+<section class="meta"><h3>Connection reference</h3><div class="rows" id="wires"></div></section>
+<section class="meta"><h3>Assembly notes</h3><div class="note"><strong>Illustrative model, not a production CAD drawing.</strong> Geometry, spacing and routed wire positions are approximate. Verify the actual silkscreen and physical pin locations before applying power. Do not use this model for precise enclosure dimensions.</div><div class="buttons"><a class="headlink" href="README.md">Read build notes</a></div></section>
+<section class="meta"><h3>Component set</h3><p style="font-size:12px;color:#5c666c;line-height:1.7;margin:0">Seeed XIAO ESP32-S3 Sense + camera/microphone expansion; Adafruit eInk Feather Friend (microSD slot used for WAV); 2.13&quot; four-color e-ink; breadboard; tactile switch; USB-C for initial testing. PowerBoost omitted.</p></section>
+</aside>
+</div>
+<footer>New XIAO concept variant. The repository's original M5StickC Plus firmware is a separate design and is not directly compatible. Reference-only 3D model; firmware and physical wiring have not been validated with the assembled hardware.</footer>
+<script type="module">
+import * as THREE from "three";
+import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+import {GLTFExporter} from "three/addons/exporters/GLTFExporter.js";
+
+const mount=document.getElementById("scene");
+const scene=new THREE.Scene();scene.background=new THREE.Color("#e8e9e5");
+const camera=new THREE.PerspectiveCamera(38,1,.1,1200);
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+mount.appendChild(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=.08;controls.minDistance=65;controls.maxDistance=430;
+const hemi=new THREE.HemisphereLight(0xffffff,0xb3b7b2,2.2);scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffffff,2.3);sun.position.set(-90,170,90);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-180;sun.shadow.camera.right=180;sun.shadow.camera.top=180;sun.shadow.camera.bottom=-180;sun.shadow.bias=-.00008;scene.add(sun);
+const stageGround=new THREE.Mesh(new THREE.PlaneGeometry(600,450),new THREE.MeshStandardMaterial({color:"#e8e9e5",roughness:1}));stageGround.rotation.x=-Math.PI/2;stageGround.position.y=-.35;stageGround.receiveShadow=true;scene.add(stageGround);
+let group=new THREE.Group();scene.add(group);let wireGroup=new THREE.Group();group.add(wireGroup);
+let stage="headers",wiresVisible=true;
+const P={board:"#18282e",edge:"#36434a",dark:"#20262a",silver:"#b9c4c9",gold:"#d9aa5c",cream:"#f7f6f0",bread:"#f5f4ec",hole:"#777d79",red:"#ed5e53",blue:"#3989ca",yellow:"#e7ad36",green:"#37ae81",orange:"#e98c44",purple:"#9973d3",pink:"#dd77ae",gray:"#989ea4",cyan:"#29a6b8",solder:"#cc9c4b"};
+const wireDefs=[
+ {name:"Power",from:"3V3",to:"3V",color:P.red},{name:"Ground",from:"GND",to:"GND",color:P.dark},
+ {name:"SPI clock",from:"D8",to:"SCK",color:P.yellow},{name:"SPI input",from:"D9",to:"MISO",color:P.green},
+ {name:"SPI output",from:"D10",to:"MOSI",color:P.blue},{name:"E-ink select",from:"D0",to:"ECS",color:P.orange},
+ {name:"Display D/C",from:"D1",to:"D/C",color:P.purple},{name:"SD select",from:"D3",to:"SDCS",color:P.pink},
+ {name:"SRAM disable",from:"3V3",to:"SRCS",color:P.gray},{name:"Record button",from:"D4",to:"SW → GND",color:P.cyan}
+];
+document.getElementById("wires").innerHTML=wireDefs.map(x=>'<div class="wire"><i class="dot" style="background:'+x.color+'"></i><span>'+x.from+' → '+x.to+'</span><span class="dest">'+x.name+'</span></div>').join("");
+const matCache={};
+function mat(c,metal=0){let k=c+"/"+metal;if(!matCache[k])matCache[k]=new THREE.MeshStandardMaterial({color:c,metalness:metal,roughness:metal?.37:.78});return matCache[k];}
+function mesh(g,shape,color){const m=new THREE.Mesh(shape,mat(color));m.castShadow=true;m.receiveShadow=true;g.add(m);return m;}
+function box(g,w,h,d,x,y,z,c){let o=mesh(g,new THREE.BoxGeometry(w,h,d),c);o.position.set(x,y,z);return o;}
+function cyl(g,r,h,x,y,z,c){let o=mesh(g,new THREE.CylinderGeometry(r,r,h,12),c);o.position.set(x,y,z);return o;}
+function line(g,pts,color,r=.32){let c=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)));let o=mesh(g,new THREE.TubeGeometry(c,48,r,6,false),color);return o;}
+function label(g,text,x,y,z,w=36){const cv=document.createElement("canvas");cv.width=768;cv.height=150;const ctx=cv.getContext("2d");ctx.clearRect(0,0,768,150);ctx.font="bold 65px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#1d2a30";ctx.fillText(text,384,78);const tx=new THREE.CanvasTexture(cv);tx.colorSpace=THREE.SRGBColorSpace;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false}));sp.position.set(x,y,z);sp.scale.set(w,w*150/768,1);g.add(sp);return sp;}
+function holeRows(g,xcenter,baseY,kind){
+ const isPerf=kind==="final";
+ box(g,94,isPerf?3.2:7.2,57,xcenter,isPerf?3.1:4,0,isPerf?"#b8895d":P.bread);
+ if(!isPerf){
+ box(g,89,.25,5.8,xcenter,7.75,0,"#cfcec5");
+ for(const z of [-23,23]){box(g,87,.14,.45,xcenter,7.71,z-2,P.red);box(g,87,.14,.45,xcenter,7.71,z+2,P.blue);}
+ }
+ for(let i=0;i<34;i++){
+  let x=xcenter-42+i*2.54;
+  for(const s of [-1,1])for(let j=0;j<5;j++){
+   const z=s*(4.5+j*2.54),y=isPerf?4.77:7.71;
+   cyl(g,isPerf?.66:.61,.11,x,y,z,isPerf?"#493b31":P.hole);
+   if(isPerf)cyl(g,1.08,.11,x,y-.08,z,P.gold);
+  }
+  if(!isPerf)for(const z of [-26.2,-22.0,22.0,26.2])cyl(g,.65,.13,x,7.74,z,P.hole);
+ }
+}
+function pinPositions(cx,cy,cz){let p={};const a=["D0","D1","D2","D3","D4","D5","D6"],b=["5V","GND","3V3","D10","D9","D8","D7"];for(let i=0;i<7;i++){p[a[i]]=[cx-7.62+i*2.54,cy,cz-7.62];p[b[i]]=[cx-7.62+i*2.54,cy,cz+7.62];}return p;}
+function xiao(g,kind){
+ const x=-48,z=0,up=kind==="headers"?30:16.3;
+ for(const s of [-1,1]){
+  box(g,18.7,2.0,2.45,x,kind==="final"?8.1:kind==="headers"?9.1:9.5,z+s*7.62,kind==="final"?"#ede8db":"#121a1d");
+  for(let i=0;i<7;i++){
+   const px=x-7.62+i*2.54;
+   cyl(g,.5,kind==="headers"?12:6,px,kind==="headers"?13.8:11.7,z+s*7.62,P.gold);
+  }
+ }
+ box(g,21,1.6,17.8,x,up,z,P.board);
+ for(const s of [-1,1])for(let i=0;i<7;i++)cyl(g,1.02,.14,x-7.62+i*2.54,up+1,z+s*7.62,P.gold);
+ box(g,5,3.3,8,x-11.6,up+2.1,z,P.silver);
+ box(g,7,1.8,7,x+3,up+1.8,z,P.dark);
+ box(g,18.3,1.1,16.1,x,up+4.2,z,"#192328");
+ box(g,4,2,4,x+3,up+5.7,z,P.dark);
+ cyl(g,4,4.2,x+3,up+8,z,P.dark);
+ cyl(g,1.9,.38,x+3,up+10.25,z,"#536f84");
+ cyl(g,1,.3,x-5,up+5.15,z+5,P.silver);
+ label(g,"XIAO + SENSE",x,up+16,0,43);
+ if(kind==="headers")label(g,"SOLDER 14 HEADER PADS",x,51,0,53);
+ return pinPositions(x,up+1,z);
+}
+function feather(g){
+ const x=38,z=-2,y=12;
+ box(g,51,1.6,23.8,x,y,z,P.board);
+ for(const s of [-1,1])for(let i=0;i<13;i++)cyl(g,.9,.13,15+i*3.82,y+1,z+s*10.3,P.gold);
+ box(g,16,1.8,15,x-10,y+1.8,z,"#aeb6b8");
+ box(g,13,.5,10,x-10,y+2.9,z,"#8a9396");
+ box(g,10,2.5,5,x+20,y+2,z,P.cream);
+ box(g,6,1.8,5,x+5,y+2.2,z+3,P.dark);
+ box(g,4,1.5,4,x+5,y+2.1,z-5,P.dark);
+ label(g,"FEATHER FRIEND · MICROSD",x,y+12,z,72);
+ // connector contacts along edge used as visual wire targets
+ let points={};
+ wireDefs.slice(0,9).forEach((w,i)=>{points[w.to]=[x-19+i*4.8,y+1.3,z-10.3];});
+ return points;
+}
+function eink(g){
+ box(g,58,3,33,109,5.4,-2,"#f6f6ee");
+ box(g,49,.2,25,109,7,-2,"#dedfd4");
+ box(g,40,.14,18,109,7.15,-2,"#e5e4da");
+ box(g,5,.8,24,80,6,-2,"#ba7737");
+ label(g,'2.13" FOUR-COLOR E-INK',109,17,-2,69);
+}
+function button(g){
+ box(g,10,2.5,10,0,9.1,21,"#373d3d");
+ box(g,6,2.2,6,0,11.3,21,"#afb0a8");
+ label(g,"RECORD",0,22,21,27);
+}
+function battery(g){
+ box(g,39,4.9,23,-21,5,-39,"#adb2b4");
+ box(g,4,.7,22,-40,5,-39,P.gold);
+ line(g,[[-40,6,-42],[-47,10,-41],[-50,11,-37]],P.red,.43);
+ line(g,[[-40,6,-36],[-46,10,-34],[-49,11,-31]],P.dark,.43);
+ label(g,"BATTERY / CONNECT LAST",-21,16,-39,57);
+}
+function wires(g,src,end){
+ wireDefs.slice(0,9).forEach((wd,i)=>{
+  const s=src[wd.from],e=end[wd.to];
+  if(!s||!e)return;
+  const height=24+i*1.05;
+  line(g,[s,[s[0]+5,height,s[2]],[-6,height+3,-9+i*.4],[e[0]-5,height,e[2]],[e[0],e[1],e[2]]],wd.color,.28);
+ });
+ const b=src.D4;
+ line(g,[b,[b[0]+5,21,b[2]],[0,19,21],[0,13.5,21]],P.cyan,.32);
+ const gr=src.GND;
+ line(g,[gr,[gr[0],20,gr[2]],[4,18,27],[4,11,23]],P.dark,.3);
+}
+function build(which){
+ group.remove(wireGroup);scene.remove(group);group=new THREE.Group();scene.add(group);
+ holeRows(group,-40,0,which);
+ const pins=xiao(group,which);
+ wireGroup=new THREE.Group();group.add(wireGroup);
+ if(which!=="headers"){
+ const target=feather(group);eink(group);button(group);wires(wireGroup,pins,target);
+ if(which==="final")battery(group);
+ }
+ wireGroup.visible=wiresVisible;
+ const info={
+ headers:["01","Solder the headers.","Hold two 7-pin male header strips straight using the breadboard. Place the XIAO over the short ends and solder each of its 14 pads. Remove the assembly from the breadboard after cooling. USB and battery must be disconnected."],
+ prototype:["02","Test on a breadboard.","Plug in the headered XIAO across the breadboard center trench. Wire power, shared SPI, three chip-select/control signals, and a record button to the Feather Friend. Use USB-C power first. The Feather Friend carries the microSD slot."],
+ final:["03","Transfer to perfboard.","Swap the temporary breadboard for copper-pad perfboard. Solder female sockets and insulated point-to-point wires. Keep the XIAO removable. Test continuity and short circuits before reconnecting USB. Add the LiPo only after the recorder works."]
+ };
+ const t=info[which];document.getElementById("stepNum").textContent="STEP "+t[0]+" / 03";
+ document.getElementById("stageTitle").textContent=t[1];document.getElementById("stageCopy").textContent=t[2];
+ document.querySelectorAll(".tab").forEach(el=>el.classList.toggle("active",el.dataset.stage===which));
+ stage=which;resetCamera();
+}
+function resetCamera(){controls.target.set(14,7,0);camera.position.set(125,124,170);controls.update();}
+document.querySelectorAll(".tab").forEach(el=>el.addEventListener("click",()=>build(el.dataset.stage)));
+document.getElementById("toggleWires").addEventListener("click",e=>{wiresVisible=!wiresVisible;wireGroup.visible=wiresVisible;e.currentTarget.textContent=wiresVisible?"Hide wires":"Show wires"});
+document.getElementById("resetCam").addEventListener("click",resetCamera);
+document.getElementById("exportGlb").addEventListener("click",()=>{
+ const btn=document.getElementById("exportGlb");btn.disabled=true;btn.textContent="Preparing model…";
+ new GLTFExporter().parse(group, data=>{
+   const blob=new Blob([data],{type:"model/gltf-binary"});const url=URL.createObjectURL(blob);
+   const a=document.createElement("a");a.href=url;a.download="xiao-voice-recorder-"+stage+".glb";document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),5000);btn.disabled=false;btn.textContent="Export 3D (.glb)";
+ },err=>{console.error(err);btn.disabled=false;btn.textContent="Export failed";},{binary:true,onlyVisible:true});
+});
+function resize(){const w=mount.clientWidth,h=mount.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);}
+new ResizeObserver(resize).observe(mount);build("headers");resize();
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
+</script>
+</body>
+</html>
