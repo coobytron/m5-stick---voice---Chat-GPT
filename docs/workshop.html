@@ -118,7 +118,7 @@ tr[data-net]{cursor:pointer}tr[data-net]:hover{background:#f2f4f1}tr[data-net].s
 </div>
 <div class="below"><h3>Exact breadboard jumper list (follow the hole names)</h3>
 <table id="wireTable"><thead><tr><th>Wire</th><th>From</th><th>To</th><th>Cable</th><th>Function</th></tr></thead><tbody></tbody></table>
-<p>Place the XIAO header pins into holes <b>e7–e13</b> and <b>f7–f13</b>, with its USB port facing the left edge of the drawing. Pins in e connect to holes a–d of their column; pins in f connect to g–j. The diagram shows the pin labels in that specific orientation. If your physical board is flipped, don't reuse these hole numbers without reorienting it.</p>
+<p>Place the XIAO header pins into holes <b>e7–e13</b> and <b>f7–f13</b>, with its USB port facing the left edge of the drawing. Pins in e connect to holes a–d of their column; pins in f connect to g–j. The diagram shows the pin labels in that specific orientation. If your physical board is flipped, don't reuse these hole numbers without reorienting it. Some breadboard power rails are split internally: check continuity, use one continuous segment, or bridge segments with a jumper.</p>
 </div>
 </section>
 <section class="panel" id="circuit">
@@ -186,8 +186,8 @@ var nets=[
 {id:"dc",color:"#9972c8",from:"a12",to:"Feather D/C",type:"F–M",desc:"XIAO D1 (GPIO2) chooses data or command for e-ink."},
 {id:"sdcs",color:"#d77ca4",from:"a10",to:"Feather SDCS",type:"F–M",desc:"XIAO D3 (GPIO4) selects Feather's microSD card."},
 {id:"srcs",color:"#969da3",from:"top + rail",to:"Feather SRCS",type:"F–M",desc:"Hold unused SRAM chip-select high (3.3 V), keeping it inactive."},
-{id:"button",color:"#1dabb5",from:"a9",to:"switch pin at a19",type:"M–M",desc:"XIAO D4 (GPIO5) connects to one side of a normally-open button; use INPUT_PULLUP."},
-{id:"button_gnd",color:"#575d62",from:"switch opposite pin at j19",to:"top − rail",type:"M–M",desc:"Opposite switch contact goes to ground; press causes GPIO5 to read LOW."}
+{id:"button",color:"#1dabb5",from:"a9",to:"switch pin at a19",type:"M–M",desc:"XIAO D4 (GPIO5) connects to one side of a normally-open button; use INPUT_PULLUP. Check which two legs are internally common with a multimeter."},
+{id:"button_gnd",color:"#575d62",from:"switch opposite pin at j19",to:"top − rail",type:"M–M",desc:"Opposite switch contact goes to ground; press causes GPIO5 to read LOW. If the pin pairs are not opposite as illustrated, rotate the switch."}
 ];
 var svg=document.getElementById("breadSvg");
 var ns="http://www.w3.org/2000/svg";function el(tag,atts,parent,txt){var x=document.createElementNS(ns,tag);Object.keys(atts||{}).forEach(function(k){x.setAttribute(k,atts[k])});if(txt!==undefined)x.textContent=txt;(parent||svg).appendChild(x);return x}
