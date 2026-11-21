@@ -1,3 +1,11 @@
+# New: Guided breadboard builder
+
+**[Open the guided build](index.html)** (recommended first). It features nine clear stages, highlighted wire endpoints, one wire at a time, zoom, next/back controls, and a persistent wiring reference.
+
+Use [Advanced workshop](workshop.html) only when you need the full exploded diagrams or soldering schematics. The original [rotatable 3D model](assembly.html) remains available.
+
+---
+
 # Updated interactive assembly workshop
 
 **[Open the interactive workshop](workshop.html)** — exploded-view slider, hole-by-hole breadboard map, clickable jumper wiring, circuit schematic, and soldering technique illustrations.
